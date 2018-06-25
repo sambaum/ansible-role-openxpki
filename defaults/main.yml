@@ -1,2 +1,21 @@
 ---
-# defaults file for ansible-role-openxpki
+
+openxpki_signing_keys:
+  - name: openxpki
+    url: https://packages.openxpki.org/debian/Release.key
+
+openxpki_repos:
+  - name: openxpki
+    repo: deb http://packages.openxpki.org/ubuntu/ dists/trusty/release/binary-amd64/
+
+openxpki_package_list:
+  - libdbd-mysql-perl
+  - libapache2-mod-fcgid
+  - libcgi-perl
+  - libmodule-load-perl
+  - libopenxpki-perl
+  - openxpki-i18n
+
+openxpki_database_name: openxpki
+openxpki_database_user: openxpki
+openxpki_database_password: "{{ vault_openxpki_database_password }}"

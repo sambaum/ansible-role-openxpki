@@ -1,2 +1,39 @@
 ---
 # tasks file for ansible-role-openxpki
+
+- name: add apt signing keys
+  apt_key:
+    url: "{{ item.url }}"
+  with_items:
+    - "{{ openxpki_signing_keys }}"
+
+- name: add apt repositories
+  apt_repository:
+    repo: "{{ item.repo }}"
+  with_items:
+    - "{{ openxpki_repos }}"
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+  when: "ansible_os_family == 'Debian'"
+  changed_when: false
+
+- name: install packages
+  package:
+    name: "{{ openxpki_package_list }}"
+    state: present
+  notify: restart apache
+
+- name: deploy database config
+  template:
+    src: database.yaml.j2
+    dest: /etc/openxpki/config.d/system/database.yaml
+  notify: restart apache
+
+- name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
+  mysql_db:
+    state: import
+    name: all
+    target: /usr/share/doc/libopenxpki-perl/examples/schema-mysql.sql.gz
+    login_password: "{{ openxpki_database_password }}"
